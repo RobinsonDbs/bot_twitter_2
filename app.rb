@@ -11,39 +11,55 @@ Dotenv.load
 
 
 
-
-  @client = Twitter::REST::Client.new do |config|
+  #
+  client = Twitter::REST::Client.new do |config|
     config.consumer_key        = ENV["TWITTER_CONSUMER_KEY"]
     config.consumer_secret     = ENV["TWITTER_CONSUMER_SECRET"]
     config.access_token        = ENV["TWITTER_ACCESS_TOKEN"]
     config.access_token_secret = ENV["TWITTER_ACCESS_TOKEN_SECRET"]
   end
 
-# def send_tweet
-# @item = @journalistes.sample(5)
-# @item.each do |i|
-#   @client.update("#{i} merci pour la lutte pour la royauté ")
-# end
-# end
-# send_tweet
+@client = client
+
+def send_tweet
+@item = @journalistes.sample(5)
+@item.each do |i|
+  @client.update("#{i} merci pour la lutte pour la royauté ")
+end
+end
+
 
 def search_bonjour_monde
    @client.search('#bonjour_monde').take(10).each do |tweet|
-     #@client.fav(tweet)
+     @client.fav(tweet)
      @client.follow(tweet.user.id)
-
-
+  end
 end
+
+def favorites
+  @yo = "#bonjour_monde"
+    @yo.each do |i|
+    @client.fav(i).first(10)
+  end
 end
-search_bonjour_monde
 
+# ================== LA ON FAIS DU STREAMING MON GARS =================================
 
+streaming = Twitter::Streaming::Client.new do |config|
+  config.consumer_key        = ENV["TWITTER_CONSUMER_KEY"]
+  config.consumer_secret     = ENV["TWITTER_CONSUMER_SECRET"]
+  config.access_token        = ENV["TWITTER_ACCESS_TOKEN"]
+  config.access_token_secret = ENV["TWITTER_ACCESS_TOKEN_SECRET"]
+  end
 
+@streaming = streaming
 
-# def faourites
-#   @yo = "#bonjour_monde"
-#   @yo.each do |i|
-#   @client.fav(i).first(10)
-# end
-# end
-# faourites
+def search_bonjour_monde_follow
+   @streaming.filter(track:"#bonjour_monde") do |tweet|
+     puts tweet.text
+     @client.fav(tweet)
+      @client.follow tweet.user.screen_name
+  end
+end
+
+search_bonjour_monde_follow
